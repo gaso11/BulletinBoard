@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Form page</title>
+    <link rel="stylesheet" type="text/css" href="main.css"/>
+</head>
+<body>
+    <h2>Enter package information:</h2>
+    <form action="/info" method="GET">
+        <label for="weight">Weight in oz</label>
+        <input type="number" name="weight"><br><br>
+        <label for="mailType">Mail Type: </label>
+        <select name="mailType">
+            <option>Letters(Stamped)</option>
+            <option>Letters(Metered)</option>
+            <option>Large Envelopes(Flats)</option>
+            <option>First-Class Package Service - Retail</option>
+        </select>
+        <br><br><input type="submit" value="Submit">
+    </form>
+    
+</body>
+</html>
