@@ -1,14 +1,14 @@
-const http = require('http');
+var express = require("express");
+var app = express();
+const PORT = process.env.PORT || 5000;
 
-const hostname = '127.0.0.1';
-const port = process.env.PORT || 5000;
+app.use(express.static('public'));
+app.set('views', 'views');
+app.set('view engine', 'ejs');
 
-const server = http.createServer((req, res) => {
-  res.statusCode = 200;
-  res.setHeader('Content-Type', 'text/plain');
-  res.end('Hello World\n');
-});
-
-server.listen(port, hostname, () => {
-  console.log(`Server running at http://${hostname}:${port}/`);
+app.get("/", function(req, res) {
+    console.log("Recieved request for root");
+    
+    res.write("This is the root");
+    res.end();
 });
