@@ -19,12 +19,12 @@ app.use(session({
 }));
 
 app.set("port", (process.env.PORT || 5000));
-app.set('views', __dirname + '/views');
+app.set('views', 'views');
 app.set('view engine', 'ejs');
 
 app.get("/", function(req, res) {
     var params = {};
-    res.render("/login", params);
+    res.render("login", params);
 });
 
 //Stuff from twitter to use as reference
