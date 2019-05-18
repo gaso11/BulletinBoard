@@ -26,14 +26,16 @@ app.get("/", function(req, res) {
     res.write("<h1>Root Page</h1>");
 });
 
-app.get("/getTable", getTable);
-app.get("/getTwitter", getTwitterSearch);
-app.post("/signup", signup);
-app.post("/login", login);
-app.post("/save", savePost);
-app.post("/refresh", refresh);
-app.post("/getUser", getUser)
-app.post("/getId", getId);
+//Stuff from twitter to use as reference
+
+//app.get("/getTable", getTable);
+//app.get("/getTwitter", getTwitterSearch);
+//app.post("/signup", signup);
+//app.post("/login", login);
+//app.post("/save", savePost);
+//app.post("/refresh", refresh);
+//app.post("/getUser", getUser)
+//app.post("/getId", getId);
 
 app.listen(app.get("port"), function() {
     console.log("Now listening for connections on port: ", app.get("port"));
