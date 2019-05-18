@@ -1,17 +1,46 @@
+//Server Setup
+
 var express = require("express");
 var app = express();
-const PORT = process.env.PORT || 5000;
+var bcrypt = require("bcrypt");
+var parseurl = require('parseurl');
+var session = require('express-session');
+const { Pool } = require("pg");
+const connectionString = process.env.DATABASE_URL || "postgres://familyhistoryuser:elijah@localhost:5432/familyhistory"
+const pool = new Pool({connectionString: connectionString});
 
 app.use(express.static('public'));
+app.use(express.json());
+app.use(express.urlencoded({extended: true}));
+app.use(session({
+    secret: 'keyboard car',
+    resave: false,
+    saveUninitialized: true
+}));
+
+app.set("port", (process.env.PORT || 5000));
 app.set('views', 'views');
 app.set('view engine', 'ejs');
 
 app.get("/", function(req, res) {
-    console.log("Recieved request for root");
-    
-    res.write("This is the root");
-    res.end();
+    var params = {}
+    res.render("home", params);
 });
+
+app.get("/getTable", getTable);
+app.get("/getTwitter", getTwitterSearch);
+app.post("/signup", signup);
+app.post("/login", login);
+app.post("/save", savePost);
+app.post("/refresh", refresh);
+app.post("/getUser", getUser)
+app.post("/getId", getId);
+
+app.listen(app.get("port"), function() {
+    console.log("Now listening for connections on port: ", app.get("port"));
+});
+
+//Server functions
 
 app.get("/info", function(req, res) {
     console.log("Recieved request for info");
@@ -30,10 +59,6 @@ app.get("/info", function(req, res) {
                         total: total,
                         jsonstr: jsonstr});
 })
-
-app.listen(PORT, function(req, res) {
-    console.log("The server is running on port " + PORT);
-});
 
 function makeJsonStr(weight, option, total) {
     var text = "{ weight: \"";
