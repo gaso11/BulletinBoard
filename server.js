@@ -23,7 +23,8 @@ app.set('views', 'views');
 app.set('view engine', 'ejs');
 
 app.get("/", function(req, res) {
-    res.write("<h1>Root Page</h1>");
+    var params = {};
+    res.render("/login", params);
 });
 
 //Stuff from twitter to use as reference
