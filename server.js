@@ -23,8 +23,7 @@ app.set('views', 'views');
 app.set('view engine', 'ejs');
 
 app.get("/", function(req, res) {
-    var params = {}
-    res.render("home", params);
+    res.write("<h1>Root Page</h1>");
 });
 
 app.get("/getTable", getTable);
