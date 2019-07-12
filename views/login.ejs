@@ -3,6 +3,8 @@
 <head>
     <title>Login</title>
     <link rel="stylesheet" type="text/css" href="login.css"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="login.js"></script>
 </head>
 
 <body>
@@ -11,39 +13,44 @@
 <div class="panel">
   <input type="radio" id="switch-open" name="switch"/>
   <input type="radio" id="switch-close" name="switch"/>
-  <div class="login">
+  <!-- LOGIN -->
+    <div class="login">
     <h1>LOGIN</h1>
     <div class="group"><i class="fa fa-envelope" aria-hidden="true"></i>
-      <input type="text" id="email" placeholder="E-Mail"/>
+      <input type="text" id="logemail" placeholder="E-Mail"/>
       <label for="email"></label>
     </div>
     <div class="group"><i class="fa fa-unlock-alt" aria-hidden="true"></i>
-      <input type="password" id="password" placeholder="Password"/>
+      <input type="password" id="logpassword" placeholder="Password"/>
       <label for="password"></label>
     </div>
-    <input type="submit" value="LOGIN"/>
+    <input type="submit" value="LOGIN" onclick="login()"/>
   </div>
+    
+<!-- REGISTRATION -->
   <div class="register">
     <label class="button-open" for="switch-open"></label>
     <label class="button-close" for="switch-close"></label>
-    <div class="inner">
+    <div class="inner">   
       <h1>REGISTER</h1>
+    <!-- Name field currently doesn't do anything, idk if it will have a purpose later -->
       <div class="group"><i class="fa fa-user" aria-hidden="true"></i>
         <input type="text" id="name" placeholder="Name"/>
         <label for="name"></label>
       </div>
       <div class="group"><i class="fa fa-envelope" aria-hidden="true"></i>
-        <input type="text" id="email" placeholder="E-Mail"/>
+        <input type="text" id="regemail" placeholder="E-Mail"/>
         <label for="email"></label>
       </div>
       <div class="group"><i class="fa fa-unlock-alt" aria-hidden="true"></i>
-        <input type="password" id="password" placeholder="Password"/>
+        <input type="password" id="regpassword" placeholder="Password"/>
         <label for="password"></label>
       </div>
-      <input type="submit" value="REGISTER"/>
+      <input type="submit" value="REGISTER" onclick="register()"/>
     </div>
   </div>
 </div>
+    
 </body>
 </html>
 

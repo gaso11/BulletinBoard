@@ -6,7 +6,7 @@ var bcrypt = require("bcrypt");
 var parseurl = require('parseurl');
 var session = require('express-session');
 const { Pool } = require("pg");
-const connectionString = process.env.DATABASE_URL || "postgres://familyhistoryuser:elijah@localhost:5432/familyhistory"
+const connectionString = process.env.DATABASE_URL || "postgres://postgres:gaso55@localhost:5432/seniorproject"
 const pool = new Pool({connectionString: connectionString});
 
 app.use(express.static('public'));
@@ -27,153 +27,209 @@ app.get("/", function(req, res) {
     res.render("login", params);
 });
 
-//Stuff from twitter to use as reference
+app.get("/search", function(req, res) {
+    var params = {};
+    res.render("search", params);
+});
 
-//app.get("/getTable", getTable);
-//app.get("/getTwitter", getTwitterSearch);
-//app.post("/signup", signup);
-//app.post("/login", login);
-//app.post("/save", savePost);
-//app.post("/refresh", refresh);
-//app.post("/getUser", getUser)
-//app.post("/getId", getId);
+app.get("/tacobell", function(req, res) {
+    var params = {};
+    res.render("tacobell", params);
+})
+
+app.post("/login", login);
+app.post("/register", register);
+app.post("/getCompanyComments", getCompanyComments);
+app.get("/getList", getListOfCompanies);
+app.get("/getURL", getURL);
+app.get("/getCompany", getCompanyByName);
 
 app.listen(app.get("port"), function() {
     console.log("Now listening for connections on port: ", app.get("port"));
 });
 
-//Server functions
+//Use this for determining who is logged in
+var sessionUser = null;
 
-app.get("/info", function(req, res) {
-    console.log("Recieved request for info");
-    
-    var weight = req.query.weight;
-    var option = req.query.mailType;
-    
-    var total = calcRate(weight, option);
-    var jsonstr = makeJsonStr(weight, option, total);
-    var params = {weight: weight,
-                  option: option,
-                  total: total};
-    
-    res.render("info", {weight: weight,
-                        option: option,
-                        total: total,
-                        jsonstr: jsonstr});
-})
+/*************************************************
+SERVER FUNCTIONS
+*************************************************/
 
-function makeJsonStr(weight, option, total) {
-    var text = "{ weight: \"";
-    text += weight;
-    text += "\", option: \"";
-    text += option;
-    text += "\", total: ";
-    text += total;
-    text += " }";
+function login(req, res) {
+    console.log("Recieved request for login");
     
-    return text;
+    //Get vars
+    var username = req.query.user;
+    var password = req.query.pass;
+    var DBHash = "";
+    
+    console.log(username);
+    console.log(password);
+    
+    getTableFromDBbyUser(username, function(error, result){
+        //No login recognized - can't get it to return an error
+        if (result[0] == null)
+            return null;
+        
+        DBHash=result[0].hash;
+        if(bcrypt.compareSync(password, DBHash)) {
+            //"Login"
+            req.session.user = result[0].email;
+            
+            //Pass the session back
+            sessionUser = req.session.user;
+            res.json(req.session.user);
+        }
+        else {
+            res.send("Failed");
+            res.end();
+        }
+    });
 }
 
-function calcRate(weight, option) {
-    var total = 0;
-    
-    if (option == "Letters(Stamped)")
-    {
-        if (weight <= 1)
-            total = .50;
-        else if (weight <= 2)
-            total = .71;
-        else if (weight <= 3)
-            total = .92;
-        else if (weight <= 4)
-            total = 1.13;
-        else {
-            //There isn't any more data
-            total = 1.13;
-        }
-    }
-    else if (option == "Letters(Metered)")
-    {
-        if (weight <= 1)
-            total = .47;
-        else if (weight <= 2)
-            total = .68;
-        else if (weight <= 3)
-            total = .89;
-        else if (weight <= 4)
-            total = 1.10;
-        else {
-            //There isn't any more data
-            total = 1.10;
-        }
-    }
-    else if (option == "Large Envelopes(Flats)")
-    {
-        if (weight <= 1)
-            total = 1.00;
-        else if (weight <= 2)
-            total = 1.21;
-        else if (weight <= 3)
-            total = 1.42;
-        else if (weight <= 4)
-            total = 1.64;
-        else if (weight <= 5)
-            total = 1.84;
-        else if (weight <= 6)
-            total = 2.05;
-        else if (weight <= 7)
-            total = 2.26;
-        else if (weight <= 8)
-            total = 2.47;
-        else if (weight <= 9)
-            total = 2.68;
-        else if (weight <= 10)
-            total = 2.89;
-        else if (weight <= 11)
-            total = 3.10;
-        else if (weight <= 12)
-            total = 3.31;
-        else if (weight <= 13)
-            total = 3.52;
-        else {
-            //There isn't any more data
-            total = 3.52;
-        }
-    }
-    else if (option == "First-Class Package Service - Retail")
-    {
-        if (weight <= 1)
-            total = 3.50;
-        else if (weight <= 2)
-            total = 3.50;
-        else if (weight <= 3)
-            total = 3.50;
-        else if (weight <= 4)
-            total = 3.50;
-        else if (weight <= 5)
-            total = 3.75;
-        else if (weight <= 6)
-            total = 3.75;
-        else if (weight <= 7)
-            total = 3.75;
-        else if (weight <= 8)
-            total = 3.75;
-        else if (weight <= 9)
-            total = 4.10;
-        else if (weight <= 10)
-            total = 4.45;
-        else if (weight <= 11)
-            total = 4.80;
-        else if (weight <= 12)
-            total = 5.15;
-        else if (weight <= 13)
-            total = 5.50;
-        else {
-            //There isn't any more data
-            total = 5.50;
-        }
-    }
-    
-    return total;   
+function register(req, res) {
+	var username = req.query.user;
+	var password = req.query.pass;
+	var hash = bcrypt.hashSync(password, 10);
+
+    //Maybe add a call here to check the table for an already
+    //existing user
+	addUserToDB(username, hash, function(err, result){
+		res.json(result);
+	});
 }
 
+function getListOfCompanies(req, res) {
+    console.log("Getting List");
+    getListOfCompaniesInDB(function(err, result){
+        res.json(result);
+    });
+}
+
+function getURL(req, res) {
+    var search = req.query.search;
+    
+    getURLFromDB(search, function(err, result){
+        res.json(result);
+    });
+}
+
+function getCompanyByName(req, res) {
+    var name = req.query.name;
+    getCompanyIdByName(name, function(err, result){
+        res.json(result);
+    });
+}
+
+function getCompanyComments(req, res) {
+    var id = req.query.id;
+    getCompanyCommentsById(id, function(err, result){
+        res.json(result);
+    });    
+}
+
+/************************************************
+* DATABASE FUNCTIONS
+************************************************/
+function addUserToDB(user, hash, callback) {
+
+	var sql = "INSERT INTO users(email, hash) VALUES ($1::text, $2::text)";
+	var params = [user, hash];
+
+	pool.query(sql, params, function(error, result) {
+		if (error) {
+			console.log("Error adding user to Table");
+			console.log(error);
+			callback(error, null);
+		}
+
+		callback(null, result);
+	});
+}
+
+function getTableFromDBbyUser(user, callback){
+    console.log("Getting table with user:", user);
+    
+    var sql = "SELECT id, email, hash FROM users WHERE email = $1::text";
+    var params = [user];
+    
+    pool.query(sql, params, function(error, result){
+        if (error){
+            console.log("An error has occured");
+            console.log(error);
+            callback(error, null);
+        }
+        
+        console.log("Found result: " + JSON.stringify(result.rows));
+        
+        callback(null, result.rows);
+    });
+}
+
+function getListOfCompaniesInDB(callback) {
+    console.log("Getting list of countries in DB");
+    
+    var sql = "SELECT company_name FROM companies";
+    
+    pool.query(sql, function(error, result){
+        if (error){
+            console.log("An error has occured");
+            console.log(error);
+            callback(error, null);
+        }
+        
+        console.log("Got list: " + JSON.stringify(result.rows));
+        
+        callback(null, result.rows);
+    });
+}
+
+function getURLFromDB(search, callback) {
+    console.log("Getting URL from search");
+    
+    var sql = "SELECT url FROM companies WHERE company_name = '" + search + "'";
+    var params = [search];
+    console.log(sql);
+    pool.query(sql, function(error, result){
+        if (error){
+            console.log("An error has occured");
+            console.log(error);
+            callback(error, null);
+        }
+        console.log("Got result: " + JSON.stringify(result.rows));
+        callback(null, result.rows);
+    });
+}
+
+function getCompanyIdByName(name, callback) {
+    console.log("Searching for id by name");
+    
+    var sql = "SELECT * FROM companies WHERE company_name = '" + name + "'";
+    var params = [name];
+    console.log(sql);
+    pool.query(sql, function(error, result){
+        if (error){
+            console.log("An error has occured");
+            console.log(error);
+            callback(error, null);
+        }
+        console.log("Got result: " + JSON.stringify(result.rows));
+        callback(null, result.rows);
+    });
+}
+
+function getCompanyCommentsById(id, callback) {
+    console.log("Searching for comments");
+    
+    var sql = "SELECT * FROM comments WHERE company_id = '" + id + "'";
+    console.log(sql);
+    pool.query(sql, function(error, result){
+        if (error){
+            console.log("An error has occured");
+            console.log(error);
+            callback(error, null);
+        }
+        console.log("Got result: " + JSON.stringify(result.rows));
+        callback(null, result.rows);
+    });    
+}

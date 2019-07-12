@@ -1,0 +1,2 @@
+Company table is going to need to be changed to reflect comments table.
+I'm not sure how to do that and it isn't that important right now.
