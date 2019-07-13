@@ -10,21 +10,17 @@ function setup() {
     //Find what page we are on
     var name = document.getElementById("company_name").textContent;
     name = name.replace(" ", "+");
-    console.log(name);
     $.get("/getCompany?name=" + name, function(data, status){
     if (data != null)
         {
             id = data[0].company_id;   
         }
         
-        console.log("Database returned " + id);
-        
         //Now get companyComments
         $.post("/getCompanyComments?id=" + id, function(comments, newStatus){
            if (comments != null)
                {
-                    company_obj = comments;
-                    console.log(comments);   
+                    company_obj = comments;   
                }
             //Now are going to have to organize all this data
             
@@ -42,6 +38,31 @@ function setup() {
             document.getElementsByClassName("pop-num")[0].innerHTML = totalsuggestions;
             document.getElementsByClassName("pop-num")[1].innerHTML = totalupvotes;
             document.getElementsByClassName("pop-num")[2].innerHTML = totaldownvotes;
+            
+            //Okay, the hard part. Here we would find the users, but nobody has a username
+            //So its just going to be numbers, which we conviently have. So lets format the
+            //comments into something presentable
+            var commentString = "";
+            
+            //More loop-de-loops
+            //This part will have to be re-worked to allow for high comments to be on top.
+            //Add in an array or something and sort it by votes...sounds fun.
+            
+            //Sort object
+            
+            for (i = 0; i < company_obj.length; i++) {
+                var votes = company_obj[i].upvote - company_obj[i].downvote;
+                commentString += "<blockquote>";
+                commentString += company_obj[i].comment;
+                commentString += "<b> - posted by user ";
+                commentString += company_obj[i].user_id;
+                commentString += "</b><br><i> ";
+                //I'm not sure I actually need to convert this, but just in case...
+                commentString += votes.toString();
+                commentString += " points</i></blockquote><br>";
+            }
+            
+            document.getElementsByClassName("posts")[0].innerHTML = commentString;
         });
     });
 }
