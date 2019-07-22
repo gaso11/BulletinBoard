@@ -20,19 +20,32 @@
       </div>
     </div>  
     <div class="posts">
-        <blockquote>Test post...very boring</blockquote><br>
-        <blockquote>Test post...very boring2</blockquote>
+        <blockquote>Loading...</blockquote><br>
     </div>
   </div>
 
-<!-- These will have to be buttons, but they are fun placeholders -->
-  <div class="plus">
+  <div class="plus" id="modalbtn">
     <div class="symbol"></div>
   </div>
-  <div class="back">
+  <div class="back" onclick="window.history.back()">
     <div class="symbol"></div>
   </div>
 </body>
+
+<!-- Add comment Modal -->
+<div id="commentModal" class="modal" style="text-align: center">
+
+  <!-- Modal content -->
+  <div class="modal-content">
+    <div class="modal-header"></div>
+    <div class="modal-body">
+    <h2>Write your comment below</h2>
+      <textarea id="commentArea" name="comment" placeholder="Enter comment here..."></textarea>
+    </div><br>
+    <button onclick="addComment()">Add Comment</button>
+  </div>
+
+</div>
 
 <style>
     

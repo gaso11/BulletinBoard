@@ -22,6 +22,10 @@ app.set("port", (process.env.PORT || 5000));
 app.set('views', 'views');
 app.set('view engine', 'ejs');
 
+
+/****************************************************
+* INDEX
+****************************************************/
 app.get("/", function(req, res) {
     var params = {};
     res.render("login", params);
@@ -29,20 +33,30 @@ app.get("/", function(req, res) {
 
 app.get("/search", function(req, res) {
     var params = {};
-    res.render("search", params);
+    
+    if (sessionUser != null)
+        res.render("search", params);
+    else
+        res.render("login", params);
 });
 
 app.get("/tacobell", function(req, res) {
     var params = {};
-    res.render("tacobell", params);
+    
+    if (sessionUser != null)
+        res.render("tacobell", params);
+    else
+        res.render("login", params);
 })
 
 app.post("/login", login);
 app.post("/register", register);
 app.post("/getCompanyComments", getCompanyComments);
+app.post("/voteOnComment", voteOnComment);
 app.get("/getList", getListOfCompanies);
 app.get("/getURL", getURL);
 app.get("/getCompany", getCompanyByName);
+app.get("/postComment", postComment);
 
 app.listen(app.get("port"), function() {
     console.log("Now listening for connections on port: ", app.get("port"));
@@ -126,6 +140,24 @@ function getCompanyComments(req, res) {
     getCompanyCommentsById(id, function(err, result){
         res.json(result);
     });    
+}
+
+function voteOnComment(req, res) {
+    var companyID = req.query.companyID;
+    var commentID = req.query.commentID;
+    
+    voteOnCommentByID(companyID, commentID, function(err, result){
+        res.json(result);
+    })
+}
+
+function postComment(req, res) {
+    var comment = req.query.comment;
+    var id = req.query.id;
+    
+    postCommentToDB(comment, id, function(err, result){
+        res.json(result);
+    })
 }
 
 /************************************************
@@ -233,3 +265,44 @@ function getCompanyCommentsById(id, callback) {
         callback(null, result.rows);
     });    
 }
+
+function voteOnCommentByID(companyID, commentID, callback) {
+    console.log("Attempting to add vote");
+    
+    //Just realized I don't need companyID
+    var sql = "UPDATE comments SET upvote = upvote + 1 ";
+        sql += "WHERE comment_id = " + "'" + commentID + "'" + "RETURNING comment_id, upvote";
+    //var sql = "SELECT * FROM comments";
+    
+    console.log(sql);
+    pool.query(sql, function(error, result){
+        if (error){
+            console.log("An error has occured");
+            console.log(error);
+            callback(error, null);
+        }
+        
+        callback(null, result);
+    });
+}
+
+function postCommentToDB(comment, id, callback) {
+    console.log("Attempting to add comment");
+    console.log(sessionUser);
+    
+    var sql = "INSERT INTO comments(company_id, user_id, comment, upvote, downvote)"
+        sql += "VALUES (" + id + ", " + "(SELECT id FROM users WHERE email = '" + sessionUser + "'), '" + comment + "', 0, 0)";
+    
+    console.log(sql);
+    
+    pool.query(sql, function(error, result){
+        if (error){
+            console.log("An error has occured");
+            console.log(error);
+            callback(error, null);
+        }
+        
+        callback(null, result);
+    })
+}
+

@@ -52,7 +52,8 @@ function setup() {
             
             for (i = 0; i < company_obj.length; i++) {
                 var votes = company_obj[i].upvote - company_obj[i].downvote;
-                commentString += "<blockquote>";
+                commentString += "<blockquote id=\"post" + i + "\" onclick=\"vote(" 
+                              + company_obj[i].company_id + "," + company_obj[i].comment_id + ")\">";
                 commentString += company_obj[i].comment;
                 commentString += "<b> - posted by user ";
                 commentString += company_obj[i].user_id;
@@ -63,6 +64,40 @@ function setup() {
             }
             
             document.getElementsByClassName("posts")[0].innerHTML = commentString;
+        });
+    });
+}
+
+function vote(companyID, commentID) {
+    var str = "?companyID=" + companyID + "&commentID=" + commentID;
+    $.post("/voteOnComment" + str, function(data, status){
+        if (data != null)
+            {
+                location.reload(true);
+            }
+    });
+}
+
+function addComment() {
+    //We will make this more complex as users are fully implemented
+    var comment = document.getElementById("commentArea").value;
+    comment = comment.replace(" ", "+");
+    console.log(comment);
+    
+    //Find what page we are on
+    var name = document.getElementById("company_name").textContent;
+    name = name.replace(" ", "+");
+    $.get("/getCompany?name=" + name, function(data, status){
+    if (data != null)
+        {
+            id = data[0].company_id;   
+        }
+    
+        $.get("/postComment?comment=" + comment +"&id=" + id, function(data, status){
+            if (data != null)
+                {
+                    location.reload(true);
+                }
         });
     });
 }
